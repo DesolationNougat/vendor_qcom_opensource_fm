@@ -115,7 +115,7 @@ static int extract_uid(int uuid)
     ALOGE("Service is stopped ");
     property_get("wc_transport.clean_up", cleanup, "0");
     property_set("wc_transport.fm_service_status", "0");
-    property_set("wc_transport.start_fmhci", "0");
+    property_set("wc_transport.start_fmhci", "false");
     property_set("wc_transport.fm_power_status", "0");
     clean = atoi(cleanup);
     ALOGE("clean Value =  %d",clean);
