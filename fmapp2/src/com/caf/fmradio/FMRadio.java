@@ -2874,6 +2874,20 @@ public class FMRadio extends Activity
       }
    };
 
+    Runnable mOnRecordingStopped = new Runnable() {
+        public void run() {
+            mRecording = false;
+            if (null != mRecordUpdateHandlerThread) {
+                mRecordUpdateHandlerThread.interrupt();
+            }
+            if(null != mRecordingMsgTV) {
+                mRecordingMsgTV.setText("");
+                setRecordingStartImage();
+            }
+            invalidateOptionsMenu();
+        }
+    };
+
    private void DebugToasts(String str, int duration) {
       //Toast.makeText(this, str, duration).show();
       Log.d(LOGTAG, "Debug:" + str);
@@ -3201,15 +3215,7 @@ public class FMRadio extends Activity
       }
       public void onRecordingStopped() {
          Log.d(LOGTAG, "mServiceCallbacks.onRecordingStopped:");
-         mRecording = false;
-         if(null != mRecordUpdateHandlerThread) {
-            mRecordUpdateHandlerThread.interrupt();
-         }
-         if(null != mRecordingMsgTV) {
-            mRecordingMsgTV.setText("");
-            setRecordingStartImage();
-         }
-         invalidateOptionsMenu();
+         mHandler.post(mOnRecordingStopped);
       }
       public void onRecordingStarted()
       {
