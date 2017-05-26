@@ -1294,6 +1294,26 @@ public class FMRadioService extends Service
         return true;
   }
 
+    class ToastOnUI implements Runnable {
+        private CharSequence mText;
+        private int mDuration;
+
+        public ToastOnUI(CharSequence text, int duration) {
+            mText = text;
+            mDuration = duration;
+        }
+
+        @Override
+        public void run() {
+            Toast.makeText(FMRadioService.this, mText, mDuration).show();
+        }
+    }
+
+    private void showToastOnUI(CharSequence text, int duration) {
+        ToastOnUI toast = new ToastOnUI(text, duration);
+        mHandler.post(toast);
+    }
+
    public void stopRecording() {
        Log.d(LOGTAG, "Enter stopRecord");
        mFmRecordingOn = false;
@@ -1318,15 +1338,14 @@ public class FMRadioService extends Service
        if (Environment.MEDIA_MOUNTED.equals(state)) {
           try {
                this.addToMediaDB(mSampleFile);
-               Toast.makeText(this,getString(R.string.save_record_file,
-                              mSampleFile.getAbsolutePath( )),
-                              Toast.LENGTH_LONG).show();
+               showToastOnUI(getString(R.string.save_record_file,
+                              mSampleFile.getAbsolutePath( )), Toast.LENGTH_LONG);
           } catch(Exception e) {
                e.printStackTrace();
           }
        } else {
            Log.e(LOGTAG, "SD card must have removed during recording. ");
-           Toast.makeText(this, "Recording aborted", Toast.LENGTH_SHORT).show();
+           showToastOnUI("Recording aborted", Toast.LENGTH_SHORT);
        }
        try {
            if((mServiceInUse) && (mCallbacks != null) ) {
@@ -1371,7 +1390,7 @@ public class FMRadioService extends Service
        Log.d(LOGTAG, "ContentURI: " + base);
        Uri result = resolver.insert(base, cv);
        if (result == null) {
-           Toast.makeText(this, "Unable to save recorded audio", Toast.LENGTH_SHORT).show();
+           showToastOnUI("Unable to save recorded audio", Toast.LENGTH_SHORT);
            return null;
        }
        if (getPlaylistId(res) == -1) {
@@ -1423,7 +1442,7 @@ public class FMRadioService extends Service
        cv.put(MediaStore.Audio.Playlists.NAME, res.getString(R.string.audio_db_playlist_name));
        Uri uri = resolver.insert(MediaStore.Audio.Playlists.getContentUri("external"), cv);
        if (uri == null) {
-           Toast.makeText(this, "Unable to save recorded audio", Toast.LENGTH_SHORT).show();
+           showToastOnUI("Unable to save recorded audio", Toast.LENGTH_SHORT);
        }
        return uri;
    }
@@ -1593,8 +1612,6 @@ public class FMRadioService extends Service
                           stopRecording();
                   case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                       Log.v(LOGTAG, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK");
-                      if (mReceiver != null)
-                          mReceiver.EnableSlimbus(RESET_SLIMBUS_DATA_PORT);
                       if (true == mPlaybackInProgress) {
                           stopFM();
                       }
@@ -3076,8 +3093,7 @@ public class FMRadioService extends Service
        }
 
        if (errorMessage != null) {
-           Toast.makeText(this, errorMessage,
-                    Toast.LENGTH_LONG).show();
+           showToastOnUI(errorMessage, Toast.LENGTH_LONG);
            return false;
        }
        return true;
